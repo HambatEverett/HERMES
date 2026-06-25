@@ -13,7 +13,7 @@ local pd = peripheral.find("player_detector")
 local cb = peripheral.find("chat_box")
 local event, username, message, uuid, isHidden, messageUtf8
 local tokens = {}
-local whitelist = {} -- put whitlisted users here e.g. {["Notch"]=true,["Jeb_"]=true}
+local whitelist = {}
 local hx = tonumber(settings.get("hermesx"))
 local hz = tonumber(settings.get("hermesz"))
 
@@ -60,13 +60,13 @@ while true do
             local distz = math.abs(hz - player.z)
             local distance = math.sqrt((distx ^ 2) + (distz ^ 2))
             print("ok2")
-            cb.sendMessageToPlayer(tostring(tokens[3]).." is at "..pd.getPlayer(tostring(tokens[3])).x..", "..pd.getPlayer(tostring(tokens[3])).y..", "..pd.getPlayer(tostring(tokens[3])).z.." ("..math.floor(distance).." blocks away)",username,"HERMES")
+            cb.sendMessageToPlayer(tostring(tokens[3]).." is at "..pd.getPlayer(tostring(tokens[3])).x..", "..pd.getPlayer(tostring(tokens[3])).y..", "..pd.getPlayer(tostring(tokens[3])).z.." ("..math.floor(distance).." blocks away)",username,"HERMES", "[]", "&e")
             print("ok3")
           else
-            cb.sendMessageToPlayer(tostring(tokens[3]).." is offline/doesnt exist. :x:",username,"HERMES")
+            cb.sendMessageToPlayer(tostring(tokens[3]).." is offline/doesnt exist. :x:",username,"HERMES", "[]", "&e")
           end
         else
-          cb.sendMessageToPlayer("No player inputted. :x:",username,"HERMES")
+          cb.sendMessageToPlayer("No player inputted. :x:",username,"HERMES", "[]", "&e")
         end
       end
     end
@@ -76,4 +76,21 @@ while true do
 end
 end
 
-main()
+local function alertloop()
+  while true do
+    print("boommmm")
+    local nearby = pd.getPlayersInCubic(1000,1000,1000)
+    print(nearby[1])
+    for i, v in pairs(nearby) do
+      local player = pd.getPlayer(nearby[i])
+      if not whitelist[player.name] then
+        for ie, ve in pairs(whitelist) do
+          cb.sendMessageToPlayer("WARNING! Player "..nearby[i].." within 500 blocks of Hermes node! XYZ: "..player.x..", "..player.y..", "..player.z, ie, "HERMES", "[]", "&e")
+        end
+      end
+    end
+    sleep(60)
+  end
+end
+
+parallel.waitForAll(main, alertloop)
